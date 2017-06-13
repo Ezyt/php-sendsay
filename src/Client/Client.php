@@ -3,7 +3,7 @@
 namespace Sendsay\Client;
 
 use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\Message\ResponseInterface;
+
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use GuzzleHttp\HandlerStack;
@@ -131,13 +131,12 @@ class Client implements ClientInterface
      */
     private function sendRequest($url, $params = [])
     {
-        /** @var ResponseInterface $response */
         $response = $this->httpClient->post($url, [
-            'verify' => false,
-            'body'   => $params
+            'verify'      => false,
+            'form_params' => $params
         ]);
 
-        return $response->json();
+        return json_decode((string)$response->getBody(), true, 512, 0);
     }
 
     /**
