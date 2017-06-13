@@ -6,6 +6,9 @@ use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Message\ResponseInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\MessageFormatter;
 use Sendsay\Exception\TooManyRedirectsException;
 use Sendsay\Message\Message;
 use Sendsay\Message\MessageInterface;
@@ -23,9 +26,9 @@ class Client implements ClientInterface
 
     /** @var array */
     protected $credentials = [
-        'login' => null,
+        'login'    => null,
         'sublogin' => null,
-        'passwd' => null
+        'passwd'   => null
     ];
 
     /** @var string */
@@ -36,7 +39,17 @@ class Client implements ClientInterface
         if (!$credentials) {
             throw new \InvalidArgumentException('Invalid api credentials');
         }
-        
+
+        $stack = HandlerStack::create();
+        $stack->push(
+            Middleware::log(
+                new Logger('api.sendsay', [
+                    new StreamHandler($options['log.path'], Logger::INFO)
+                ]),
+                new MessageFormatter('{req_body} - {res_body}')
+            )
+        );
+
         $this->credentials = $credentials;
         $this->login();
     }
@@ -77,11 +90,11 @@ class Client implements ClientInterface
 
             do {
                 $response = $this->sendRequest(self::API_END_POINT . $redirectPath, $params);
-                if (isset($response['REDIRECT'])){
+                if (isset($response['REDIRECT'])) {
                     $redirectPath = $response['REDIRECT'];
                 }
                 $redirectCount++;
-                if ($redirectCount > self::REDIRECT_LIMIT){
+                if ($redirectCount > self::REDIRECT_LIMIT) {
                     throw new TooManyRedirectsException('Too many redirects');
                 }
             } while (isset($response['REDIRECT']));
@@ -92,7 +105,7 @@ class Client implements ClientInterface
             }
 
             $message->setData(isset($response['obj']) ? $response['obj'] : $response);
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             $message->setError($e->getMessage());
         }
         return $message;
@@ -105,7 +118,7 @@ class Client implements ClientInterface
     private function getErrorMessageFromResponse($response)
     {
         $error = reset($response['errors']);
-        if(!isset($error['explain'])){
+        if (!isset($error['explain'])) {
             return $error['id'];
         }
         return is_string($error['explain']) ? $error['explain'] : serialize($error['explain']);
@@ -121,7 +134,7 @@ class Client implements ClientInterface
         /** @var ResponseInterface $response */
         $response = $this->httpClient->post($url, [
             'verify' => false,
-            'body' => $params
+            'body'   => $params
         ]);
 
         return $response->json();
@@ -139,9 +152,9 @@ class Client implements ClientInterface
 
         return [
             'apiversion' => self::API_VERSION,
-            'json' => self::JSON_RESPONSE,
+            'json'       => self::JSON_RESPONSE,
             'request.id' => mt_rand(100, 999),
-            'request' => json_encode($data),
+            'request'    => json_encode($data),
         ];
     }
 }
