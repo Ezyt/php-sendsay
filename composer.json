@@ -2,6 +2,7 @@
     "name": "k-yuriy/php-sendsay",
     "description": "Object-oriented interface to Sendsay API.",
     "type": "library",
+    "minimum-stability": "stable",
     "require": {
         "php": ">=5.5.0",
         "guzzlehttp/guzzle": "~6",
