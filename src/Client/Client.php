@@ -50,6 +50,7 @@ class Client implements ClientInterface
             )
         );
 
+        $this->httpClient = new HttpClient(['handler' => $stack]);
         $this->credentials = $credentials;
         $this->login();
     }
