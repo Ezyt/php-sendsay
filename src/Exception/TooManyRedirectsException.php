@@ -1,8 +1,10 @@
 <?php
 
-namespace Sendsay\Exception;
+namespace Ezyt\Sendsay\Exception;
 
-class TooManyRedirectsException extends \Exception
+use Exception;
+
+class TooManyRedirectsException extends Exception
 {
 
 }

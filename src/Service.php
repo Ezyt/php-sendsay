@@ -1,16 +1,27 @@
 <?php
 
-namespace Sendsay;
+namespace Ezyt\Sendsay;
 
-use Sendsay\Client\Client;
-use Sendsay\Message\MessageInterface;
+use Ezyt\Sendsay\Client\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use InvalidArgumentException;
+use LogicException;
 
 class Service
 {
     /** @var Client */
     private $client;
 
-    public function __construct($credentials, $options = [])
+    /**
+     * Service constructor.
+     * @param array $credentials
+     * @param array $options
+     * @throws GuzzleException
+     * @throws \GuzzleHttp\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
+     * @throws LogicException
+     */
+    public function __construct(array $credentials, array $options = [])
     {
         $this->client = new Client($credentials, $options);
     }
@@ -19,8 +30,12 @@ class Service
      * @param array $credentials
      * @param array $options
      * @return Service
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     * @throws LogicException
+     * @throws \GuzzleHttp\Exception\InvalidArgumentException
      */
-    public static function create($credentials, $options = [])
+    public static function create(array $credentials, array $options = []): Service
     {
         return new static($credentials, $options);
     }
@@ -28,15 +43,15 @@ class Service
     /**
      * @param string $email
      * @return array|null
+     * @throws GuzzleException
      */
-    public function getUser($email)
+    public function getUser(string $email): ?array
     {
-        /** @var MessageInterface $response */
         $response = $this->client->request('member.get', ['email' => $email]);
-        if($response->hasError()){
+        if ($response->hasError()) {
             return null;
         }
         $data = $response->getData();
-        return $data['member'];
+        return $data['member'] ?? null;
     }
 }

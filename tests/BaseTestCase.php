@@ -1,10 +1,15 @@
 <?php
 
-namespace Sendsay\Tests;
+namespace Ezyt\Sendsay\Tests;
+
+use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionProperty;
 
 date_default_timezone_set('UTC');
 
-class BaseTestCase extends \PHPUnit_Framework_TestCase
+class BaseTestCase extends TestCase
 {
     /**
      * Call protected class method using reflection
@@ -13,10 +18,11 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
      * @param string $name
      * @param array $args
      * @return mixed
+     * @throws ReflectionException
      */
-    protected function callMethod($obj, $name, $args = [])
+    protected function callMethod(string $obj, string $name, array $args = [])
     {
-        $class = new \ReflectionClass($obj);
+        $class = new ReflectionClass($obj);
         $method = $class->getMethod($name);
         $method->setAccessible(true);
         return $method->invokeArgs(null, $args);
@@ -26,10 +32,11 @@ class BaseTestCase extends \PHPUnit_Framework_TestCase
      * @param string $class
      * @param string $name
      * @return mixed
+     * @throws ReflectionException
      */
-    protected function getProperty($class, $name)
+    protected function getProperty(string $class, string $name)
     {
-        $property = new \ReflectionProperty($class, $name);
+        $property = new ReflectionProperty($class, $name);
         $property->setAccessible(true);
         return $property->getValue($class);
     }

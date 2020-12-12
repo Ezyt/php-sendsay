@@ -1,31 +1,45 @@
 <?php
 
-namespace Sendsay\Tests\Client;
+namespace Ezyt\Sendsay\Tests\Client;
 
-use Sendsay\Client\Client;
-use Sendsay\Tests\BaseTestCase;
+use Ezyt\Sendsay\Client\Client;
+use Ezyt\Sendsay\Tests\BaseTestCase;
+use InvalidArgumentException;
 
 class ClientTest extends BaseTestCase
 {
     /**
-     * @expectedException \InvalidArgumentException
+     * @covers
+     * @throws InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \GuzzleHttp\Exception\InvalidArgumentException
+     * @throws \LogicException
      */
-    public function testConstructorWithInvalidCredentials()
+    public function testConstructorWithInvalidCredentials(): void
     {
-        new Client(null, ['log.path' => 'api.sendsay.log']);
+        $this->expectException(InvalidArgumentException::class);
+        new Client([], ['log.path' => 'api.sendsay.log']);
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @covers
+     * @throws InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \GuzzleHttp\Exception\InvalidArgumentException
+     * @throws \LogicException
      */
-    public function testConstructor()
+    public function testConstructor(): void
     {
-        new Client([
-            'login' => 'foo',
-            'sublogin' => 'bar',
-            'passwd' => 'test',
-        ], [
-            'log.path' => __DIR__ . '/../../logs/api.sendsay.log'
-        ]);
+        $this->expectException(InvalidArgumentException::class);
+        new Client(
+            [
+                'login'    => 'foo',
+                'sublogin' => 'bar',
+                'passwd'   => 'test',
+            ],
+            [
+                'log.path' => __DIR__ . '/../../logs/api.sendsay.log',
+            ]
+        );
     }
 }

@@ -4,3 +4,5 @@ vendor/
 logs/
 
 composer.lock
+
+.phpunit.result.cache

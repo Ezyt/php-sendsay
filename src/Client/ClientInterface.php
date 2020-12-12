@@ -1,9 +1,9 @@
 <?php
 
-namespace Sendsay\Client;
+namespace Ezyt\Sendsay\Client;
 
-use Sendsay\Exception\TooManyRedirectsException;
-use Sendsay\Message\MessageInterface;
+use Ezyt\Sendsay\Message\MessageInterface;
+use GuzzleHttp\Exception\GuzzleException;
 
 interface ClientInterface
 {
@@ -12,7 +12,7 @@ interface ClientInterface
      * @param array $data
      * @return MessageInterface
      *
-     * @throws TooManyRedirectsException
+     * @throws GuzzleException
      */
-    public function request($action, $data = []);
+    public function request(string $action, array $data = []): MessageInterface;
 }

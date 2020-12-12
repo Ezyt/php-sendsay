@@ -1,33 +1,20 @@
 <?php
 
-namespace Sendsay\Message;
+namespace Ezyt\Sendsay\Message;
 
 interface MessageInterface
 {
-    /**
-     * @return string|null
-     */
-    public function getError();
+    public function getError(): ?string;
 
-    /**
-     * @param string $value
-     * @return $this
-     */
-    public function setError($value);
+    public function setError(string $value): self;
 
-    /**
-     * @return bool
-     */
-    public function hasError();
+    public function hasError(): bool;
 
-    /**
-     * @return mixed
-     */
-    public function getData();
+    public function getData(): ?array;
 
     /**
      * @param mixed $value
      * @return $this
      */
-    public function setData($value);
+    public function setData($value): self;
 }

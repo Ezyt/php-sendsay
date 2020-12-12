@@ -1,25 +1,26 @@
 {
-    "name": "k-yuriy/php-sendsay",
+    "name": "ezyt/php-sendsay",
     "description": "Object-oriented interface to Sendsay API.",
     "type": "library",
     "minimum-stability": "stable",
     "require": {
-        "php": ">=5.5.0",
-        "guzzlehttp/guzzle": "~6",
+        "php": ">=7.2 <8.1",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.0|^7.0",
         "monolog/monolog": "~1.0"
     },
     "require-dev": {
         "ext-curl": "*",
-        "phpunit/phpunit": "~4.0"
+        "phpunit/phpunit": "~9.0"
     },
     "autoload": {
         "psr-4": {
-            "Sendsay\\": "src/"
+            "Ezyt\\Sendsay\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Sendsay\\Tests\\": "tests/"
+            "Ezyt\\Sendsay\\Tests\\": "tests/"
         }
     }
 }

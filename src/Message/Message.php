@@ -1,6 +1,6 @@
 <?php
 
-namespace Sendsay\Message;
+namespace Ezyt\Sendsay\Message;
 
 class Message implements MessageInterface
 {
@@ -9,36 +9,23 @@ class Message implements MessageInterface
     /** @var array */
     private $data;
 
-    /**
-     * @return string|null
-     */
-    public function getError()
+    public function getError(): ?string
     {
         return $this->error;
     }
 
-    /**
-     * @param string $value
-     * @return $this
-     */
-    public function setError($value)
+    public function setError(string $value): MessageInterface
     {
-        $this->error = (string)$value;
+        $this->error = $value;
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasError()
+    public function hasError(): bool
     {
         return $this->error !== null;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getData()
+    public function getData(): ?array
     {
         return $this->data;
     }
@@ -47,7 +34,7 @@ class Message implements MessageInterface
      * @param mixed $value
      * @return $this
      */
-    public function setData($value)
+    public function setData($value): MessageInterface
     {
         $this->data = (array)$value;
         return $this;

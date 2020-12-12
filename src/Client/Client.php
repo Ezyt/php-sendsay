@@ -1,25 +1,30 @@
 <?php
 
-namespace Sendsay\Client;
+namespace Ezyt\Sendsay\Client;
 
+use Exception;
+use Ezyt\Sendsay\Exception\TooManyRedirectsException;
+use Ezyt\Sendsay\Message\Message;
+use Ezyt\Sendsay\Message\MessageInterface;
 use GuzzleHttp\Client as HttpClient;
-
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\MessageFormatter;
+use GuzzleHttp\Middleware;
+use InvalidArgumentException;
+use LogicException;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware;
-use GuzzleHttp\MessageFormatter;
-use Sendsay\Exception\TooManyRedirectsException;
-use Sendsay\Message\Message;
-use Sendsay\Message\MessageInterface;
+
+use function is_string;
 
 class Client implements ClientInterface
 {
-    const API_VERSION = 100;
-    const JSON_RESPONSE = 1;
-    const REDIRECT_LIMIT = 10;
+    protected const    API_VERSION    = 100;
+    protected const    JSON_RESPONSE  = 1;
+    protected const    REDIRECT_LIMIT = 10;
 
-    const API_END_POINT = 'https://api.sendsay.ru/';
+    protected const API_END_POINT = 'https://api.sendsay.ru/';
 
     /** @var HttpClient */
     protected $httpClient;
@@ -28,24 +33,36 @@ class Client implements ClientInterface
     protected $credentials = [
         'login'    => null,
         'sublogin' => null,
-        'passwd'   => null
+        'passwd'   => null,
     ];
 
     /** @var string */
     private $session;
 
-    public function __construct($credentials, $options)
+    /**
+     * Client constructor.
+     * @param $credentials
+     * @param $options
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
+     * @throws \GuzzleHttp\Exception\InvalidArgumentException
+     * @throws LogicException
+     */
+    public function __construct(array $credentials, array $options)
     {
-        if (!$credentials) {
-            throw new \InvalidArgumentException('Invalid api credentials');
+        if (empty($credentials)) {
+            throw new InvalidArgumentException('Invalid api credentials');
         }
 
         $stack = HandlerStack::create();
         $stack->push(
             Middleware::log(
-                new Logger('api.sendsay', [
-                    new StreamHandler($options['log.path'], Logger::INFO)
-                ]),
+                new Logger(
+                    'api.sendsay',
+                    [
+                        new StreamHandler($options['log.path'], Logger::INFO),
+                    ]
+                ),
                 new MessageFormatter('{req_body} - {res_body}')
             )
         );
@@ -56,15 +73,16 @@ class Client implements ClientInterface
     }
 
     /**
-     * @throws \InvalidArgumentException
+     * @throws GuzzleException
+     * @throws InvalidArgumentException
      */
-    private function login()
+    private function login(): void
     {
-        if (!isset($this->session)) {
+        if ($this->session === null) {
             $message = $this->request('login', $this->credentials);
             $data = $message->getData();
             if (!isset($data['session'])) {
-                throw new \InvalidArgumentException($message->getError());
+                throw new InvalidArgumentException($message->getError());
             }
             $this->session = $data['session'];
         }
@@ -75,9 +93,9 @@ class Client implements ClientInterface
      * @param array $data
      * @return MessageInterface
      *
-     * @throws TooManyRedirectsException
+     * @throws GuzzleException
      */
-    public function request($action, $data = [])
+    public function request(string $action, array $data = []): MessageInterface
     {
         $message = new Message();
 
@@ -105,18 +123,14 @@ class Client implements ClientInterface
                 return $message->setError($errorMessage);
             }
 
-            $message->setData(isset($response['obj']) ? $response['obj'] : $response);
-        } catch (\Exception $e) {
+            $message->setData($response['obj'] ?? $response);
+        } catch (Exception $e) {
             $message->setError($e->getMessage());
         }
         return $message;
     }
 
-    /**
-     * @param array $response
-     * @return string
-     */
-    private function getErrorMessageFromResponse($response)
+    private function getErrorMessageFromResponse(array $response): string
     {
         $error = reset($response['errors']);
         if (!isset($error['explain'])) {
@@ -129,22 +143,27 @@ class Client implements ClientInterface
      * @param string $url
      * @param array $params
      * @return array|null
+     * @throws GuzzleException
      */
-    private function sendRequest($url, $params = [])
+    private function sendRequest(string $url, array $params = []): ?array
     {
-        $response = $this->httpClient->post($url, [
-            'verify'      => false,
-            'form_params' => $params
-        ]);
+        $response = $this->httpClient->post(
+            $url,
+            [
+                'verify'      => false,
+                'form_params' => $params,
+            ]
+        );
 
-        return json_decode((string)$response->getBody(), true, 512, 0);
+        return json_decode((string)$response->getBody(), true);
     }
 
     /**
      * @param array $data
      * @return array
+     * @throws Exception
      */
-    private function buildRequestParams($data)
+    private function buildRequestParams(array $data): array
     {
         if ($this->session !== null && !isset($data['session'])) {
             $data['session'] = $this->session;
@@ -153,7 +172,7 @@ class Client implements ClientInterface
         return [
             'apiversion' => self::API_VERSION,
             'json'       => self::JSON_RESPONSE,
-            'request.id' => mt_rand(100, 999),
+            'request.id' => random_int(100, 999),
             'request'    => json_encode($data),
         ];
     }
